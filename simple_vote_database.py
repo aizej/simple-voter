@@ -82,64 +82,74 @@ def create_triggers():
     with get_connection() as conn:
         c = conn.cursor()
         c.execute('''
-            CREATE TRIGGER IF NOT EXISTS vote_deleted
-            AFTER DELETE ON votes_table
-            BEGIN
-                UPDATE ideas_table
-                SET up_votes = up_votes -
-                    CASE WHEN OLD.vote = 1 THEN 1 ELSE 0 END,
-                    down_votes = down_votes -
-                CASE WHEN OLD.vote = 0 THEN 1 ELSE 0 END,
-                sum_votes = sum_votes -
-                CASE WHEN OLD.vote = 1 THEN 1 WHEN OLD.vote = 0 THEN -1 ELSE 0 END
-            WHERE idea_id = OLD.idea_id;
-        END;
-    ''')
+                CREATE TRIGGER IF NOT EXISTS vote_deleted
+                AFTER DELETE ON votes_table
+                BEGIN
+                    UPDATE ideas_table
+                    SET up_votes = up_votes -
+                        CASE WHEN OLD.vote = 1 THEN 1 ELSE 0 END,
+                        down_votes = down_votes -
+                    CASE WHEN OLD.vote = 0 THEN 1 ELSE 0 END,
+                    sum_votes = sum_votes -
+                    CASE WHEN OLD.vote = 1 THEN 1 WHEN OLD.vote = 0 THEN -1 ELSE 0 END
+                WHERE idea_id = OLD.idea_id;
+            END;
+        ''')
 
-    c.execute('''
-        CREATE TRIGGER IF NOT EXISTS vote_inserted
-        AFTER INSERT ON votes_table
-        BEGIN
-            UPDATE ideas_table
-            SET up_votes = up_votes +
-                CASE WHEN NEW.vote = 1 THEN 1 ELSE 0 END,
-                down_votes = down_votes +
-                CASE WHEN NEW.vote = 0 THEN 1 ELSE 0 END,
-                sum_votes = sum_votes +
-                CASE WHEN NEW.vote = 1 THEN 1 WHEN NEW.vote = 0 THEN -1 ELSE 0 END
-            WHERE idea_id = NEW.idea_id;
-        END;
-    ''')
-
-
-    c.execute('''
-    CREATE TRIGGER IF NOT EXISTS vote_updated
-        AFTER UPDATE OF vote ON votes_table
+        c.execute('''
+            CREATE TRIGGER IF NOT EXISTS vote_inserted
+            AFTER INSERT ON votes_table
             BEGIN
                 UPDATE ideas_table
                 SET up_votes = up_votes +
-                        CASE
-                            WHEN NEW.vote = 0 THEN -1
-                            WHEN NEW.vote = 1 THEN 1
-                            ELSE 0
-                        END,
+                    CASE WHEN NEW.vote = 1 THEN 1 ELSE 0 END,
                     down_votes = down_votes +
-                        CASE
-                            WHEN NEW.vote = 0 THEN 1
-                            WHEN NEW.vote = 1 THEN -1
-                            ELSE 0
-                        END,
+                    CASE WHEN NEW.vote = 0 THEN 1 ELSE 0 END,
                     sum_votes = sum_votes +
-                        CASE
-                            WHEN NEW.vote = 0 THEN -2
-                            WHEN NEW.vote = 1 THEN 2
-                            ELSE 0
-                        END
+                    CASE WHEN NEW.vote = 1 THEN 1 WHEN NEW.vote = 0 THEN -1 ELSE 0 END
                 WHERE idea_id = NEW.idea_id;
             END;
-    ''')
+        ''')
 
-    conn.commit()
+
+        c.execute('''
+        CREATE TRIGGER IF NOT EXISTS vote_updated
+            AFTER UPDATE OF vote ON votes_table
+                BEGIN
+                    UPDATE ideas_table
+                    SET up_votes = up_votes +
+                            CASE
+                                WHEN NEW.vote = 0 THEN -1
+                                WHEN NEW.vote = 1 THEN 1
+                                ELSE 0
+                            END,
+                        down_votes = down_votes +
+                            CASE
+                                WHEN NEW.vote = 0 THEN 1
+                                WHEN NEW.vote = 1 THEN -1
+                                ELSE 0
+                            END,
+                        sum_votes = sum_votes +
+                            CASE
+                                WHEN NEW.vote = 0 THEN -2
+                                WHEN NEW.vote = 1 THEN 2
+                                ELSE 0
+                            END
+                    WHERE idea_id = NEW.idea_id;
+                END;
+        ''')
+
+        c.execute('''
+                CREATE TRIGGER IF NOT EXISTS idea_deleted
+                AFTER DELETE ON ideas_table
+                BEGIN
+                    DELETE FROM votes_table WHERE idea_id = OLD.idea_id;
+                END;
+                ''')
+
+
+
+        conn.commit()
 
 def start_database():
     create_ideas_table()
