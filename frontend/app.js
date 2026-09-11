@@ -2,7 +2,7 @@
 // CONFIG
 // ============================================================
 
-const WS_URL = "ws://localhost:8001";
+const WS_URL = "ws://158.101.167.252:8001/";
 
 // Comparators used for sorting. Add a new key here (and a matching
 // <option> in index.html) to support another sort mode later.
