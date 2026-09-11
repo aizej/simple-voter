@@ -187,6 +187,11 @@ h1 {
   gap: 0.75rem;
   grid-template-columns: minmax(0, 1fr) auto auto auto;
   padding: 1.1rem 0;
+  will-change: transform;
+}
+
+.idea-content {
+  min-width: 0;
 }
 
 .idea-text {
@@ -194,6 +199,13 @@ h1 {
   line-height: 1.4;
   min-width: 0;
   overflow-wrap: anywhere;
+}
+
+.creation-time {
+  color: var(--muted);
+  display: block;
+  font-size: 0.7rem;
+  margin-top: 0.35rem;
 }
 
 .metric-label {
@@ -287,6 +299,11 @@ button.vote-button:focus-visible {
     grid-column: 1 / -1;
     grid-row: 1;
     margin-bottom: 0.25rem;
+  }
+
+  .idea-content {
+    grid-column: 1 / -1;
+    grid-row: 1;
   }
 
   .idea-row .vote-button:nth-of-type(1) {

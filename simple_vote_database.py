@@ -49,7 +49,8 @@ def create_ideas_table():
                     idea_text TEXT UNIQUE NOT NULL,
                     up_votes INTEGER NOT NULL DEFAULT 0,
                     down_votes INTEGER NOT NULL DEFAULT 0,
-                    sum_votes INTEGER NOT NULL DEFAULT 0
+                    sum_votes INTEGER NOT NULL DEFAULT 0,
+                    creation_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 )''')
         conn.commit()
 
@@ -196,7 +197,7 @@ def get_idea_votes(idea_id):
 def get_all_ideas():
     with get_connection() as conn:
         c = conn.cursor()
-        c.execute('''SELECT idea_id, idea_text, up_votes, down_votes, sum_votes FROM ideas_table ''')
+        c.execute('''SELECT idea_id, idea_text, up_votes, down_votes, sum_votes, creation_time FROM ideas_table ''')
     #return as a list of dictionaries
     
     ideas = []
@@ -206,7 +207,8 @@ def get_all_ideas():
             "idea_text": row[1],
             "up_votes": row[2],
             "down_votes": row[3],
-            "sum_votes": row[4]
+            "sum_votes": row[4],
+            "creation_time": row[5]
         })
     return ideas
 
@@ -219,14 +221,6 @@ def get_user_votes(user_id):
     for row in c.fetchall():
         votes[row[0]] = row[1]
     return votes
-
-def get_user_vote(user_id, idea_id):
-    with get_connection() as conn:
-        c = conn.cursor()
-        c.execute('''SELECT vote FROM votes_table
-                     WHERE user_id = ? AND idea_id = ?''', (user_id, idea_id))
-        result = c.fetchone()
-    return result[0] if result else None
 
 
 def get_ideas_with_user_info(user_id):
@@ -364,11 +358,19 @@ async def websocket_handler(websocket):
                     await broadcast(vote_update, exclude=websocket)
 
                     # Send the authoritative personal vote to the voter.
+                    user_vote = next(
+                        (
+                            idea["user_vote"]
+                            for idea in get_ideas_with_user_info(user_id)
+                            if idea["idea_id"] == idea_id
+                        ),
+                        None
+                    )
                     await send_json(
                         websocket,
                         {
                             **vote_update,
-                            "user_vote": get_user_vote(user_id, idea_id)
+                            "user_vote": user_vote
                         }
                     )
 
@@ -485,3 +487,5 @@ async def main():
 if __name__ == "__main__":
 
     asyncio.run(main())
+
+
