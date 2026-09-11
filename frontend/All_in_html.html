@@ -1,0 +1,663 @@
+<meta charset="UTF-8">
+  <title>Idea Voting</title>
+  <link rel="stylesheet" href="style.css">
+
+
+  <main class="app-shell">
+    <header class="page-header">
+      <div>
+        <p class="eyebrow">Live board</p>
+        
+      </div>
+      <p id="connection-status" class="connection-status" role="status">
+        <span class="status-dot" aria-hidden="true"></span>
+        <span class="status-label">Connecting...</span>
+      </p>
+    </header>
+
+    <section id="add-idea-section" class="add-idea-section" aria-label="Add an idea">
+      <form id="add-idea-form">
+        <input type="text" id="add-idea-input" placeholder="Any good ideas?" required="">
+        <button type="submit">Add idea <span aria-hidden="true">+</span></button>
+      </form>
+    </section>
+
+    <section id="sort-section" class="toolbar" aria-label="Board controls">
+      <p class="board-title">All ideas</p>
+      <label for="sort-select">Sort by:
+        <select id="sort-select">
+          <option value="sum_votes">Net score</option>
+          <option value="up_votes">Most upvotes</option>
+          <option value="down_votes">Most downvotes</option>
+          <option value="creation_time">Newest first</option>
+        </select>
+      </label>
+    </section>
+
+    <ul id="idea-list"></ul>
+  </main>
+
+  <script src="app.js"></script>
+
+
+
+<style>
+:root {
+  color-scheme: light;
+  --ink: #111111;
+  --muted: #6d6d6d;
+  --line: #dedede;
+  --soft: #f9f9f9;
+  --paper: #f9f9f9;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background: var(--soft);
+  color: var(--ink);
+  font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+  margin: 0;
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+button,
+select {
+  cursor: pointer;
+}
+
+.app-shell {
+  background: var(--paper);
+  margin: 0 auto;
+  max-width: 1120px;
+  min-height: 100vh;
+  padding: clamp(2rem, 6vw, 5.5rem) clamp(1rem, 5vw, 4.5rem);
+}
+
+.page-header {
+  align-items: flex-start;
+  display: flex;
+  justify-content: space-between;
+  gap: 2rem;
+  margin-bottom: clamp(2rem, 5vw, 4rem);
+}
+
+.eyebrow {
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  margin: 0 0 0.6rem;
+  text-transform: uppercase;
+}
+
+h1 {
+  font-size: clamp(2.5rem, 6vw, 5rem);
+  letter-spacing: -0.06em;
+  line-height: 0.95;
+  margin: 0;
+}
+
+.connection-status {
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--muted);
+  display: inline-flex;
+  flex: 0 0 auto;
+  font-size: 0.78rem;
+  font-weight: 700;
+  gap: 0.55rem;
+  margin: 0.4rem 0 0;
+  padding: 0.55rem 0.85rem;
+  white-space: nowrap;
+}
+
+.status-dot {
+  background: currentColor;
+  border-radius: 50%;
+  height: 0.5rem;
+  width: 0.5rem;
+}
+
+.connection-status.connected {
+  color: var(--ink);
+}
+
+.connection-status.connected .status-dot {
+  animation: signal 2s ease-in-out infinite;
+  background: #28a745;
+}
+
+@keyframes signal {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.3); }
+  50% { box-shadow: 0 0 0 5px rgba(40, 167, 69, 0); }
+}
+
+.add-idea-section {
+  border-bottom: 1px solid var(--ink);
+  padding-bottom: 1.25rem;
+}
+
+#add-idea-form {
+  display: flex;
+  gap: 0.75rem;
+}
+
+#add-idea-input {
+  background: transparent;
+  border: 0;
+  border-bottom: 2px solid var(--ink);
+  border-radius: 0;
+  color: var(--ink);
+  flex: 1;
+  min-width: 0;
+  outline: 0;
+  padding: 0.75rem 0;
+}
+
+#add-idea-input:focus {
+  border-bottom-color: var(--muted);
+}
+
+#add-idea-input::placeholder {
+  color: #999;
+}
+
+#add-idea-form button {
+  background: var(--ink);
+  border: 1px solid var(--ink);
+  color: white;
+  font-weight: 700;
+  padding: 0.75rem 1.1rem;
+}
+
+#add-idea-form button:hover,
+#add-idea-form button:focus-visible {
+  background: #333;
+}
+
+#add-idea-form button span {
+  font-size: 1.2em;
+  margin-left: 0.35rem;
+}
+
+.toolbar {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.75rem 0 0.8rem;
+}
+
+.board-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.toolbar label {
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+#sort-select {
+  background: transparent;
+  border: 0;
+  color: var(--ink);
+  font-weight: 700;
+  margin-left: 0.25rem;
+  outline: 0;
+  padding: 0.4rem 0;
+}
+
+#idea-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.idea-row {
+  align-items: center;
+  border-bottom: 1px solid var(--line);
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: minmax(0, 1fr) auto auto auto;
+  padding: 1.1rem 0;
+  will-change: transform;
+}
+
+.idea-content {
+  min-width: 0;
+}
+
+.idea-text {
+  font-size: clamp(0.98rem, 1.5vw, 1.1rem);
+  line-height: 1.4;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.creation-time {
+  color: var(--muted);
+  display: block;
+  font-size: 0.7rem;
+  margin-top: 0.35rem;
+}
+
+.metric-label {
+  color: var(--muted);
+  font-size: 0.65rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-align: center;
+}
+
+.score-count {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 3.5rem;
+}
+
+.score-count strong {
+  font-size: 1.2rem;
+  font-variant-numeric: tabular-nums;
+}
+
+button.vote-button {
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  flex-direction: column;
+  gap: 0.15rem;
+  justify-content: center;
+  min-width: 3.2rem;
+  padding: 0.35rem 0.6rem;
+}
+
+.vote-symbol {
+  font-size: 1.05rem;
+  line-height: 1;
+}
+
+.vote-button-count {
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+}
+
+button.vote-button.active {
+  background-color: var(--ink);
+  color: white;
+}
+
+button.vote-button:hover,
+button.vote-button:focus-visible {
+  border-color: var(--ink);
+}
+
+@media (max-width: 600px) {
+  .page-header {
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .connection-status {
+    font-size: 0;
+    padding: 0.65rem;
+  }
+
+  .connection-status .status-label {
+    display: none;
+  }
+
+  #add-idea-form {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+
+  #add-idea-form button {
+    align-self: flex-start;
+  }
+
+  .idea-row {
+    gap: 0.55rem;
+    grid-template-columns: minmax(3.2rem, 1fr) auto auto minmax(3.2rem, 1fr);
+  }
+
+  .idea-text {
+    grid-column: 1 / -1;
+    grid-row: 1;
+    margin-bottom: 0.25rem;
+  }
+
+  .idea-content {
+    grid-column: 1 / -1;
+    grid-row: 1;
+  }
+
+  .idea-row .vote-button:nth-of-type(1) {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  .idea-row .score-count {
+    grid-column: 2 / 4;
+    grid-row: 2;
+  }
+
+  .idea-row .vote-button:nth-of-type(2) {
+    grid-column: 4;
+    grid-row: 2;
+  }
+}
+
+
+</style>
+
+
+<script>
+// ============================================================
+// CONFIG
+// ============================================================
+
+const WS_URL = "ws://158.101.167.252:8001/";
+
+// Comparators used for sorting. Add a new key here (and a matching
+// <option> in index.html) to support another sort mode later.
+const SORT_COMPARATORS = {
+  sum_votes: (a, b) => b.sum_votes - a.sum_votes,
+  up_votes: (a, b) => b.up_votes - a.up_votes,
+  down_votes: (a, b) => b.down_votes - a.down_votes,
+  creation_time: (a, b) => getCreationTimestamp(b) - getCreationTimestamp(a),
+};
+
+
+// ============================================================
+// STATE
+// ============================================================
+
+const state = {
+  socket: null,
+  ideas: [],       // [{ idea_id, idea_text, up_votes, down_votes, sum_votes, creation_time, user_vote }]
+  sortBy: "sum_votes",
+};
+
+
+// ============================================================
+// DOM ELEMENTS
+// ============================================================
+
+const connectionStatusEl = document.getElementById("connection-status");
+const connectionStatusLabelEl = connectionStatusEl.querySelector(".status-label");
+const ideaListEl = document.getElementById("idea-list");
+const addIdeaFormEl = document.getElementById("add-idea-form");
+const addIdeaInputEl = document.getElementById("add-idea-input");
+const sortSelectEl = document.getElementById("sort-select");
+
+
+// ============================================================
+// CONNECTION
+// ============================================================
+
+function connectToServer() {
+  state.socket = new WebSocket(WS_URL);
+
+  state.socket.addEventListener("open", handleSocketOpen);
+  state.socket.addEventListener("close", handleSocketClose);
+  state.socket.addEventListener("message", handleSocketMessage);
+}
+
+function handleSocketOpen() {
+  connectionStatusLabelEl.textContent = "Connected";
+  connectionStatusEl.classList.add("connected");
+}
+
+function handleSocketClose() {
+  connectionStatusLabelEl.textContent = "Disconnected";
+  connectionStatusEl.classList.remove("connected");
+}
+
+function sendAction(action, payload = {}) {
+  state.socket.send(JSON.stringify({ action, ...payload }));
+}
+
+
+// ============================================================
+// RECEIVING MESSAGES
+// ============================================================
+
+function handleSocketMessage(event) {
+  const message = JSON.parse(event.data);
+  console.log("message: ", message);
+
+
+  switch (message.action) {
+    case "ideas":
+      handleIdeasMessage(message);
+      break;
+
+    case "ideas_update":
+      handleIdeasUpdateMessage(message);
+      break;
+
+    case "vote_update":
+      handleVoteUpdateMessage(message);
+      break;
+
+    case "error":
+      handleErrorMessage(message);
+      break;
+
+    default:
+      console.warn("Unknown action from server:", message);
+  }
+}
+
+// Full list including this user's votes. Sent on connect and in
+// response to an explicit "ideas_with_user_info" request.
+function handleIdeasMessage(message) {
+  state.ideas = message.ideas_with_user_info;
+  renderIdeas();
+}
+
+// Sent after someone adds an idea. Does NOT include user_vote, so we
+// merge it into what we already know instead of overwriting state.
+function handleIdeasUpdateMessage(message) {
+  state.ideas = mergeIdeasKeepingUserVotes(state.ideas, message.ideas);
+  renderIdeas();
+}
+
+// Sent after any user votes. Updates shared counts for everyone. The
+// server includes user_vote only for the client that submitted the vote.
+function handleVoteUpdateMessage(message) {
+  const idea = state.ideas.find((i) => i.idea_id === message.idea_id);
+  if (!idea) return;
+
+  idea.up_votes = message.up_votes;
+  idea.down_votes = message.down_votes;
+  idea.sum_votes = idea.up_votes - idea.down_votes;
+
+  if (Object.hasOwn(message, "user_vote")) {
+    idea.user_vote = message.user_vote;
+  }
+
+  renderIdeas();
+}
+
+function handleErrorMessage(message) {
+  console.error("Server error:", message.message);
+}
+
+
+// ============================================================
+// STATE HELPERS
+// ============================================================
+
+function mergeIdeasKeepingUserVotes(oldIdeas, newIdeas) {
+  const oldById = new Map(oldIdeas.map((idea) => [idea.idea_id, idea]));
+
+  return newIdeas.map((idea) => ({
+    ...idea,
+    user_vote: oldById.get(idea.idea_id)?.user_vote ?? null,
+  }));
+}
+
+function getSortedIdeas() {
+  const comparator = SORT_COMPARATORS[state.sortBy];
+  return [...state.ideas].sort(comparator);
+}
+
+function getCreationTimestamp(idea) {
+  const timestamp = Date.parse(String(idea.creation_time).replace(" ", "T"));
+  return Number.isNaN(timestamp) ? 0 : timestamp;
+}
+
+function formatCreationTime(creationTime) {
+  const date = new Date(getCreationTimestamp({ creation_time: creationTime }));
+  if (Number.isNaN(date.getTime())) return String(creationTime ?? "");
+
+  const pad = (value) => String(value).padStart(2, "0");
+
+  return `${date.getFullYear()}/${pad(date.getMonth() + 1)}/${pad(date.getDate())} ${
+    pad(date.getHours())
+  }:${pad(date.getMinutes())}`;
+}
+
+
+// ============================================================
+// RENDERING
+// ============================================================
+
+function renderIdeas() {
+  const previousPositions = new Map(
+    [...ideaListEl.children].map((row) => [row.dataset.ideaId, row.getBoundingClientRect()])
+  );
+
+  ideaListEl.innerHTML = "";
+  for (const idea of getSortedIdeas()) {
+    ideaListEl.appendChild(createIdeaElement(idea));
+  }
+
+  animateIdeaReorder(previousPositions);
+}
+
+function animateIdeaReorder(previousPositions) {
+  for (const row of ideaListEl.children) {
+    const previousPosition = previousPositions.get(row.dataset.ideaId);
+    if (!previousPosition) {
+      row.animate(
+        [{ opacity: 0, transform: "translateY(-0.5rem)" }, { opacity: 1, transform: "translateY(0)" }],
+        { duration: 280, easing: "ease-out" }
+      );
+      continue;
+    }
+
+    const currentPosition = row.getBoundingClientRect();
+    const offsetY = previousPosition.top - currentPosition.top;
+    if (offsetY !== 0) {
+      row.animate(
+        [{ transform: `translateY(${offsetY}px)` }, { transform: "translateY(0)" }],
+        { duration: 380, easing: "cubic-bezier(0.22, 1, 0.36, 1)" }
+      );
+    }
+  }
+}
+
+function createIdeaElement(idea) {
+  const row = document.createElement("li");
+  row.className = "idea-row";
+  row.dataset.ideaId = idea.idea_id;
+
+  const downvoteButton = createVoteButton("Downvote", idea.down_votes, idea.user_vote == 0, () =>
+    onVoteButtonClick(idea.idea_id, false)
+  );
+  const upvoteButton = createVoteButton("Upvote", idea.up_votes, idea.user_vote == 1, () =>
+    onVoteButtonClick(idea.idea_id, true)
+  );
+
+  const ideaContent = document.createElement("div");
+  ideaContent.className = "idea-content";
+
+  const text = document.createElement("span");
+  text.className = "idea-text";
+  text.textContent = idea.idea_text;
+
+  const creationTime = document.createElement("time");
+  creationTime.className = "creation-time";
+  creationTime.dateTime = String(idea.creation_time ?? "");
+  creationTime.textContent = `${formatCreationTime(idea.creation_time)}`;
+  ideaContent.append(text, creationTime);
+
+  const score = document.createElement("span");
+  score.className = "score-count";
+  score.setAttribute("aria-label", `Net score ${idea.sum_votes}`);
+  score.innerHTML = `<span class="metric-label">SCORE</span><strong>${idea.sum_votes}</strong>`;
+
+  row.append(ideaContent, downvoteButton, score, upvoteButton);
+  return row;
+}
+
+function createVoteButton(label, count, isActive, onClick) {
+  const button = document.createElement("button");
+  button.className = "vote-button" + (isActive ? " active" : "");
+  button.type = "button";
+  button.setAttribute("aria-label", `${label}, ${count} votes`);
+  button.innerHTML = `<span class="vote-symbol" aria-hidden="true">${label === "Upvote" ? "+" : "−"}</span><span class="vote-button-count">${count}</span>`;
+  button.addEventListener("click", onClick);
+  return button;
+}
+
+
+// ============================================================
+// EVENT HANDLERS (user actions)
+// ============================================================
+
+function onVoteButtonClick(ideaId, vote) {
+  sendAction("vote", { idea_id: ideaId, vote });
+}
+
+function onAddIdeaSubmit(event) {
+  event.preventDefault();
+
+  const ideaText = addIdeaInputEl.value.trim();
+  if (!ideaText) return;
+
+  sendAction("add_idea", { idea_text: ideaText });
+  addIdeaInputEl.value = "";
+}
+
+function onSortChange(event) {
+  state.sortBy = event.target.value;
+  renderIdeas();
+}
+
+
+// ============================================================
+// INIT
+// ============================================================
+
+function init() {
+  addIdeaFormEl.addEventListener("submit", onAddIdeaSubmit);
+  sortSelectEl.addEventListener("change", onSortChange);
+  connectToServer();
+}
+
+init();
+
+
+</script>
