@@ -1,21 +1,40 @@
 # %%
+"""
+Simple Vote Database setup:
+
+1) Chose a name for your database file, e.g. "simple_vote_database.db" and set it in the variable DATABASE_FILE below.
+
+2) Chose a port for the database websocket and put it in the variable PORT below. Make sure the port is not already in use.
+   Dont forget to change the port in the frontend/app.js file as well.
+
+3) Chose how you want to generate the user_id and change it in websocket_handler() function. You can use cookies or other methods.
+   The current user_id is the ip address of the client. (Each user gets one vote per idea)
+
+4) Run this script. The database file will be creted and the websocket server will start. You can now open the frontend/index.html file in your browser and start voting.
+"""
+
+# %%
 import asyncio
 import json
 import sqlite3
 import websockets
 
 # %%
+
+
 DATABASE_NAME = "simple_vote_database.db"
 
 HOST = "0.0.0.0"
 PORT = 8001
 
+
+
+
+
+
 # %%
-
-
 # All currently connected WebSocket clients
 connected_clients = set()
-
 
 # %%
 # ============================================================
