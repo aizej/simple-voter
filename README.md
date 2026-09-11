@@ -1,6 +1,6 @@
 # Simple Voter
 
-A lightweight Python utility for submitting quick votes to the idea voting system on my website.
+A lightweight server side Python utility for submitting quick votes to the idea voting system on my website.
 
 ## Purpose
 
