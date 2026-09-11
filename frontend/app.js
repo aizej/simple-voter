@@ -158,10 +158,11 @@ function formatCreationTime(creationTime) {
   const date = new Date(getCreationTimestamp({ creation_time: creationTime }));
   if (Number.isNaN(date.getTime())) return String(creationTime ?? "");
 
-  return new Intl.DateTimeFormat(undefined, {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(date);
+  const pad = (value) => String(value).padStart(2, "0");
+
+  return `${date.getFullYear()}/${pad(date.getMonth() + 1)}/${pad(date.getDate())} ${
+    pad(date.getHours())
+  }:${pad(date.getMinutes())}`;
 }
 
 
@@ -226,7 +227,7 @@ function createIdeaElement(idea) {
   const creationTime = document.createElement("time");
   creationTime.className = "creation-time";
   creationTime.dateTime = String(idea.creation_time ?? "");
-  creationTime.textContent = `Added ${formatCreationTime(idea.creation_time)}`;
+  creationTime.textContent = `${formatCreationTime(idea.creation_time)}`;
   ideaContent.append(text, creationTime);
 
   const score = document.createElement("span");
