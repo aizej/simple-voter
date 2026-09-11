@@ -1,0 +1,37 @@
+body {
+  font-family: sans-serif;
+  max-width: 600px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+
+#idea-list {
+  list-style: none;
+  padding: 0;
+}
+
+.idea-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #ccc;
+}
+
+.idea-text {
+  flex: 1;
+}
+
+.vote-count {
+  min-width: 2rem;
+  text-align: center;
+}
+
+button.vote-button {
+  cursor: pointer;
+}
+
+button.vote-button.active {
+  background-color: #444;
+  color: white;
+}

@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Idea Voting</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <h1>Idea Voting</h1>
+
+  <p id="connection-status">Connecting...</p>
+
+  <section id="add-idea-section">
+    <form id="add-idea-form">
+      <input type="text" id="add-idea-input" placeholder="New idea..." required>
+      <button type="submit">Add idea</button>
+    </form>
+  </section>
+
+  <section id="sort-section">
+    <label for="sort-select">Sort by:</label>
+    <select id="sort-select">
+      <option value="sum_votes">Net score</option>
+      <option value="up_votes">Most upvotes</option>
+      <option value="down_votes">Most downvotes</option>
+    </select>
+  </section>
+
+  <ul id="idea-list"></ul>
+
+  <script src="app.js"></script>
+</body>
+</html>
