@@ -29,6 +29,7 @@ const state = {
 // ============================================================
 
 const connectionStatusEl = document.getElementById("connection-status");
+const connectionStatusLabelEl = connectionStatusEl.querySelector(".status-label");
 const ideaListEl = document.getElementById("idea-list");
 const addIdeaFormEl = document.getElementById("add-idea-form");
 const addIdeaInputEl = document.getElementById("add-idea-input");
@@ -48,11 +49,13 @@ function connectToServer() {
 }
 
 function handleSocketOpen() {
-  connectionStatusEl.textContent = "Connected";
+  connectionStatusLabelEl.textContent = "Connected";
+  connectionStatusEl.classList.add("connected");
 }
 
 function handleSocketClose() {
-  connectionStatusEl.textContent = "Disconnected";
+  connectionStatusLabelEl.textContent = "Disconnected";
+  connectionStatusEl.classList.remove("connected");
 }
 
 function sendAction(action, payload = {}) {
@@ -161,41 +164,32 @@ function createIdeaElement(idea) {
   const row = document.createElement("li");
   row.className = "idea-row";
 
-  const upvoteButton = createVoteButton("▲", idea.user_vote == 1, () =>
-    onVoteButtonClick(idea.idea_id, true)
-  );
-  const downvoteButton = createVoteButton("▼", idea.user_vote == 0, () =>
+  const downvoteButton = createVoteButton("Downvote", idea.down_votes, idea.user_vote == 0, () =>
     onVoteButtonClick(idea.idea_id, false)
   );
-
-
-  
-  
+  const upvoteButton = createVoteButton("Upvote", idea.up_votes, idea.user_vote == 1, () =>
+    onVoteButtonClick(idea.idea_id, true)
+  );
 
   const text = document.createElement("span");
   text.className = "idea-text";
   text.textContent = idea.idea_text;
 
   const score = document.createElement("span");
-  score.className = "vote-count";
-  score.textContent = idea.sum_votes;
+  score.className = "score-count";
+  score.setAttribute("aria-label", `Net score ${idea.sum_votes}`);
+  score.innerHTML = `<span class="metric-label">SCORE</span><strong>${idea.sum_votes}</strong>`;
 
-  const up_votes = document.createElement("span");
-  up_votes.className = "vote-count";
-  up_votes.textContent = "↑" + idea.up_votes;
-
-  const down_votes = document.createElement("span");
-  down_votes.className = "vote-count";
-  down_votes.textContent = "↓" + idea.down_votes;
-
-  row.append(text, upvoteButton, up_votes, down_votes, score, downvoteButton);
+  row.append(text, downvoteButton, score, upvoteButton);
   return row;
 }
 
-function createVoteButton(label, isActive, onClick) {
+function createVoteButton(label, count, isActive, onClick) {
   const button = document.createElement("button");
   button.className = "vote-button" + (isActive ? " active" : "");
-  button.textContent = label;
+  button.type = "button";
+  button.setAttribute("aria-label", `${label}, ${count} votes`);
+  button.innerHTML = `<span class="vote-symbol" aria-hidden="true">${label === "Upvote" ? "+" : "−"}</span><span class="vote-button-count">${count}</span>`;
   button.addEventListener("click", onClick);
   return button;
 }

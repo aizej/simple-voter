@@ -6,28 +6,38 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <main class="app-shell">
+    <header class="page-header">
+      <div>
+        <p class="eyebrow">Live board</p>
+        <h1>Idea Voting</h1>
+      </div>
+      <p id="connection-status" class="connection-status" role="status">
+        <span class="status-dot" aria-hidden="true"></span>
+        <span class="status-label">Connecting...</span>
+      </p>
+    </header>
 
-  <h1>Idea Voting</h1>
+    <section id="add-idea-section" class="add-idea-section" aria-label="Add an idea">
+      <form id="add-idea-form">
+        <input type="text" id="add-idea-input" placeholder="What should we build next?" required>
+        <button type="submit">Add idea <span aria-hidden="true">+</span></button>
+      </form>
+    </section>
 
-  <p id="connection-status">Connecting...</p>
+    <section id="sort-section" class="toolbar" aria-label="Board controls">
+      <p class="board-title">All ideas</p>
+      <label for="sort-select">Sort by:
+        <select id="sort-select">
+          <option value="sum_votes">Net score</option>
+          <option value="up_votes">Most upvotes</option>
+          <option value="down_votes">Most downvotes</option>
+        </select>
+      </label>
+    </section>
 
-  <section id="add-idea-section">
-    <form id="add-idea-form">
-      <input type="text" id="add-idea-input" placeholder="New idea..." required>
-      <button type="submit">Add idea</button>
-    </form>
-  </section>
-
-  <section id="sort-section">
-    <label for="sort-select">Sort by:</label>
-    <select id="sort-select">
-      <option value="sum_votes">Net score</option>
-      <option value="up_votes">Most upvotes</option>
-      <option value="down_votes">Most downvotes</option>
-    </select>
-  </section>
-
-  <ul id="idea-list"></ul>
+    <ul id="idea-list"></ul>
+  </main>
 
   <script src="app.js"></script>
 </body>
