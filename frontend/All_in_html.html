@@ -376,6 +376,7 @@ button.vote-button:focus-visible {
 // ============================================================
 
 const WS_URL = "ws://158.101.167.252:8001/";
+const POOL_TEXT = "showcase_pool";  // Change this to use a different pool of ideas
 
 // Comparators used for sorting. Add a new key here (and a matching
 // <option> in index.html) to support another sort mode later.
@@ -425,6 +426,7 @@ function connectToServer() {
 function handleSocketOpen() {
   connectionStatusLabelEl.textContent = "Connected";
   connectionStatusEl.classList.add("connected");
+  sendAction("join_pool");
 }
 
 function handleSocketClose() {
@@ -433,7 +435,7 @@ function handleSocketClose() {
 }
 
 function sendAction(action, payload = {}) {
-  state.socket.send(JSON.stringify({ action, ...payload }));
+  state.socket.send(JSON.stringify({ action, pool_text: POOL_TEXT, ...payload }));
 }
 
 

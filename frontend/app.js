@@ -1,8 +1,29 @@
 // ============================================================
-// CONFIG
+// CONFIG FOR FRONTEND
 // ============================================================
 
-const WS_URL = "ws://158.101.167.252:8001/";
+
+
+const WS_URL = "ws://158.101.167.252:8001/"; // Change this to the URL and port of your backend server
+// The port needs to match the port used in the backend server. If you are running the backend locally, you can use "ws://localhost:8001/"
+const POOL_TEXT = "showcase_pool";  // Change this to use a different pool of ideas 
+// you can chose any name for the pool
+// every frontend client that connects with the same pool_text will see the same ideas and votes
+
+
+
+// ============================================================
+// END OF CONFIG 
+// ============================================================
+
+
+
+
+
+
+
+
+
 
 // Comparators used for sorting. Add a new key here (and a matching
 // <option> in index.html) to support another sort mode later.
@@ -52,6 +73,7 @@ function connectToServer() {
 function handleSocketOpen() {
   connectionStatusLabelEl.textContent = "Connected";
   connectionStatusEl.classList.add("connected");
+  sendAction("join_pool");
 }
 
 function handleSocketClose() {
@@ -60,7 +82,7 @@ function handleSocketClose() {
 }
 
 function sendAction(action, payload = {}) {
-  state.socket.send(JSON.stringify({ action, ...payload }));
+  state.socket.send(JSON.stringify({ action, pool_text: POOL_TEXT, ...payload }));
 }
 
 
