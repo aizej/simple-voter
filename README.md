@@ -17,7 +17,7 @@ It is intended to be easy to run, easy to understand, and useful for basic votin
 1. Open the script.
 2. Adjust the vote details if needed.
 3. Run it with Python.
-4. Connect with frontend app
+4. Connect with frontend app.
 
 ## Related link
 

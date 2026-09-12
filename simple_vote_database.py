@@ -75,13 +75,18 @@ def create_ideas_table():
     with get_connection() as conn:
         conn.execute('''CREATE TABLE IF NOT EXISTS ideas_table (
                     idea_id INTEGER PRIMARY KEY,
-                    idea_text TEXT UNIQUE NOT NULL,
+                    idea_text TEXT NOT NULL,
                     pool_text TEXT NOT NULL,
 
                     up_votes INTEGER NOT NULL DEFAULT 0,
                     down_votes INTEGER NOT NULL DEFAULT 0,
                     sum_votes INTEGER NOT NULL DEFAULT 0,
-                    creation_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    creation_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+
+
+                    
+                    UNIQUE (idea_text, pool_text)
                 )''')
         conn.commit()
 
