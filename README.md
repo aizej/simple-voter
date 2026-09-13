@@ -1,9 +1,9 @@
 # Simple Voter
 
 A lightweight server side Python utility for ideas that can be voted on by anyone.
-Every vote updates in real time with other users.
-The script supports multiple idea tables for diferent idea categories.
-All ideas and votes are stored in sqlite database.
+Anyone can add ideas, vote on ideas and everything updates in real-time.
+Every vote is stored in sqlite database and multiple distinct idea tables are supported.
+
 
 ## Purpose
 
